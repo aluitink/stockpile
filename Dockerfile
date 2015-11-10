@@ -1,7 +1,7 @@
 FROM microsoft/aspnet:1.0.0-beta8
 
-COPY Stockpile.Sdk/project.json /opt/stockpile/Stockpile.Sdk
-COPY Stockpile.Api/project.json /opt/stockpile/Stockpile.Api
+COPY Stockpile.Sdk/project.json /opt/stockpile/Stockpile.Sdk/
+COPY Stockpile.Api/project.json /opt/stockpile/Stockpile.Api/
 
 WORKDIR /opt/stockpile/Stockpile.Sdk
 RUN ["dnu", "restore"]

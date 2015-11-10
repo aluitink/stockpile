@@ -9,6 +9,6 @@
     "dnx451": { }
   },
   "dependencies": {
-    "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-beta8-15653"
+    "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-beta8"
   }
 }
