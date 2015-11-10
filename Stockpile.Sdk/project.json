@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0-*",
+  "description": "Stockpile.Sdk Class Library",
+  "authors": [ "Andrew" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "frameworks": {
+    "dnx451": { }
+  },
+  "dependencies": {
+    "Microsoft.Dnx.Runtime.Abstractions": "1.0.0-beta8-15653"
+  }
+}
