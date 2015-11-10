@@ -1,11 +1,25 @@
-﻿{
+{
   "profiles": {
     "IIS Express": {
-      "commandName" : "IISExpress",
+      "commandName": "IISExpress",
       "launchBrowser": true,
       "launchUrl": "api/values",
-      "environmentVariables" : {
+      "environmentVariables": {
         "ASPNET_ENV": "Development"
+      }
+    },
+    "web": {
+      "commandName": "web",
+      "environmentVariables": {
+        "ASPNET_ENV": "Development"
+      }
+    },
+    "kestrel": {
+      "commandName": "kestrel",
+      "environmentVariables": {
+        "DataProviderConnectionString": "DATA=C:\\Temp\\stockpile\\provider",
+        "StorageAdapter": "Stockpile.StorageAdapter.FileSystem",
+        "StorageAdapterConnectionString": "DATA=C:\\Temp\\stockpile\\data"
       }
     }
   }

@@ -1,4 +1,4 @@
-﻿{
+{
   "webroot": "wwwroot",
   "version": "1.0.0-*",
 
@@ -10,7 +10,9 @@
     "Microsoft.Framework.Logging": "1.0.0-beta8",
     "Microsoft.Framework.Logging.Console": "1.0.0-beta8",
     "Microsoft.Framework.Logging.Debug": "1.0.0-beta8",
-    "Stockpile.Sdk": "1.0.0-*"
+    "Stockpile.DataProvider.Lucandrew": "1.0.0-*",
+    "Stockpile.Sdk": "1.0.0-*",
+    "Stockpile.StorageAdapter.FileSystem": "1.0.0-*"
   },
 
   "commands": {

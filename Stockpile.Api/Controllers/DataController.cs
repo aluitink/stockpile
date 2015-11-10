@@ -7,6 +7,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Framework.OptionsModel;
 using Stockpile.Api.App;
+using Stockpile.Sdk.Models;
 
 namespace Stockpile.Api.Controllers
 {
@@ -19,28 +20,59 @@ namespace Stockpile.Api.Controllers
         [HttpGet("{id}")]
         public FileStreamResult Get(Guid id)
         {
-            throw new NotImplementedException();
+            var stock = DataProvider.RetrieveStock(id);
+            var stream = StorageAdapter.Read(stock.ExternalStorageKey);
+
+            return new FileStreamResult(stream, "application/octet-stream");
         }
 
         // POST api/data
         [HttpPost]
-        public Guid Post()
+        public async Task<Guid> Post()
         {
-            throw new NotImplementedException();
+            using (var tempStream = GetTempFileStream())
+            {
+                await HttpContextService.HttpContext.Request.Body.CopyToAsync(tempStream);
+
+                tempStream.Position = 0;
+
+                var storageKey = StorageAdapter.Create(tempStream);
+                Stock stock = new Stock();
+                stock.ExternalStorageKey = storageKey;
+
+                stock = DataProvider.CreateStock(stock);
+
+                return stock.Id;
+            }
         }
 
         // PUT api/data/5
         [HttpPut("{id}")]
-        public bool Put(Guid id)
+        public async Task<bool> Put(Guid id)
         {
-            throw new NotImplementedException();
+            using (var tempStream = GetTempFileStream())
+            {
+                await HttpContextService.HttpContext.Request.Body.CopyToAsync(tempStream);
+                tempStream.Position = 0;
+
+                var stock = DataProvider.RetrieveStock(id);
+
+                return StorageAdapter.Update(stock.ExternalStorageKey, tempStream);
+            }
         }
 
         // DELETE api/data/5
         [HttpDelete("{id}")]
         public bool Delete(Guid id)
         {
-            throw new NotImplementedException();
+            var stock = DataProvider.RetrieveStock(id);
+
+            var success = StorageAdapter.Delete(stock.ExternalStorageKey);
+
+            if(success)
+                success &= DataProvider.DeleteStock(id);
+
+            return success;
         }
     }
 }

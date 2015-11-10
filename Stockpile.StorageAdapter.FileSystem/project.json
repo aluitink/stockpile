@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0-*",
+  "description": "Stockpile.StorageAdapter.FileSystem Class Library",
+  "authors": [ "Andrew" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "frameworks": {
+    "dnx451": {
+      "dependencies": {
+        "Stockpile.Sdk": "1.0.0-*"
+      }
+    }
+  }
+}

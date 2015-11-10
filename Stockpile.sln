@@ -9,6 +9,16 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Stockpile.Api.Test", "Stock
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Stockpile.Sdk", "Stockpile.Sdk\Stockpile.Sdk.xproj", "{CE3F1C57-AD3A-4F5F-BC30-3990EE136F55}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9DE49569-A467-46D4-A992-C3A4D13DC6E8}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Stockpile.DataProvider.Lucandrew", "Stockpile.DataProvider.Lucandrew\Stockpile.DataProvider.Lucandrew.xproj", "{A8D76DF7-E001-4981-9564-94A78BE1C954}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataProviders", "DataProviders", "{37EC7153-9EC7-47D8-8D52-693D52F9224D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "StorageAdapters", "StorageAdapters", "{F162E9F4-3A0D-40D3-8C1D-B3024F044603}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Stockpile.StorageAdapter.FileSystem", "Stockpile.StorageAdapter.FileSystem\Stockpile.StorageAdapter.FileSystem.xproj", "{558444FB-DB14-46F5-9BD1-D43DC815A231}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,8 +37,20 @@ Global
 		{CE3F1C57-AD3A-4F5F-BC30-3990EE136F55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE3F1C57-AD3A-4F5F-BC30-3990EE136F55}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE3F1C57-AD3A-4F5F-BC30-3990EE136F55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8D76DF7-E001-4981-9564-94A78BE1C954}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8D76DF7-E001-4981-9564-94A78BE1C954}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8D76DF7-E001-4981-9564-94A78BE1C954}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8D76DF7-E001-4981-9564-94A78BE1C954}.Release|Any CPU.Build.0 = Release|Any CPU
+		{558444FB-DB14-46F5-9BD1-D43DC815A231}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{558444FB-DB14-46F5-9BD1-D43DC815A231}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{558444FB-DB14-46F5-9BD1-D43DC815A231}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{558444FB-DB14-46F5-9BD1-D43DC815A231}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A8D76DF7-E001-4981-9564-94A78BE1C954} = {37EC7153-9EC7-47D8-8D52-693D52F9224D}
+		{558444FB-DB14-46F5-9BD1-D43DC815A231} = {F162E9F4-3A0D-40D3-8C1D-B3024F044603}
 	EndGlobalSection
 EndGlobal

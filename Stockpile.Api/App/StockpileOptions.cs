@@ -4,5 +4,6 @@ namespace Stockpile.Api.App
     {
         public string StorageAdapter { get; set; }
         public string StorageAdapterConnectionString { get; set; }
+        public string DataProviderConnectionString { get; set; }
     }
 }
