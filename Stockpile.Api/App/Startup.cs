@@ -4,6 +4,7 @@ using Microsoft.AspNet.Hosting;
 using Microsoft.Framework.Configuration;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Logging;
+using Microsoft.Framework.OptionsModel;
 
 namespace Stockpile.Api.App
 {
@@ -38,9 +39,13 @@ namespace Stockpile.Api.App
         }
 
         // Configure is called after ConfigureServices is called.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IOptions<StockpileOptions> options)
         {
+            var webConfigPath = Path.Combine(env.WebRootPath, "web.config");
+            var logRootDirPath = options.Value.LoggingDirectory;
+
             loggerFactory.MinimumLevel = LogLevel.Debug;
+            loggerFactory.AddProvider(new Log4NetLoggerProvider(new FileInfo(webConfigPath), new DirectoryInfo(logRootDirPath)));
             loggerFactory.AddConsole();
             loggerFactory.AddDebug();
             

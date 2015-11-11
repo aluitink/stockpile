@@ -19,7 +19,8 @@
       "environmentVariables": {
         "DataProviderConnectionString": "192.168.1.15:6380",
         "StorageAdapter": "Stockpile.StorageAdapter.FileSystem",
-        "StorageAdapterConnectionString": "DATA=C:\\Temp\\stockpile\\data"
+        "StorageAdapterConnectionString": "DATA=C:\\Temp\\stockpile\\data",
+        "LoggingDirectory": "C:\\Temp\\stockpile\\logs"
       }
     }
   }
