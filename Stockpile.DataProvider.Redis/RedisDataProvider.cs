@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using MsgPack;
 using StackExchange.Redis;
@@ -23,10 +24,10 @@ namespace Stockpile.DataProvider.Redis
 
         private static ObjectPacker _packer;
         
-        public RedisDataProvider(string connectionString)
+        public RedisDataProvider(string connectionString, TextWriter writer = null)
         {
             if(Muxer == null)
-                Muxer = ConnectionMultiplexer.Connect(connectionString);
+                Muxer = ConnectionMultiplexer.Connect(connectionString, writer);
         }
 
         public void Dispose()
