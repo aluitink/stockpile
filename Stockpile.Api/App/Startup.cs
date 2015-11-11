@@ -31,13 +31,16 @@ namespace Stockpile.Api.App
             services.AddLogging();
             services.AddTransient<HttpContextService>();
             services.Configure<StockpileOptions>(Configuration);
-            services.AddMvc();
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(typeof(LastChanceExceptionHandler));
+            });
         }
 
         // Configure is called after ConfigureServices is called.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.MinimumLevel = LogLevel.Information;
+            loggerFactory.MinimumLevel = LogLevel.Debug;
             loggerFactory.AddConsole();
             loggerFactory.AddDebug();
             
