@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "csredis": "3.2.1",
-    "MsgPack": "0.1.0.2011042300",
     "Stockpile.Sdk": "1.0.0-*"
   }
 }

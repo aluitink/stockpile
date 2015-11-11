@@ -38,8 +38,7 @@ namespace Stockpile.DataProvider.Lucandrew
                 System.IO.Directory.CreateDirectory(_path);
                 newIndex = true;
             }
-                
-
+            
             _analyzer = new StandardAnalyzer(Version);
             _indexWriter = new IndexWriter(FSDirectory.Open(_path), _analyzer, newIndex, IndexWriter.MaxFieldLength.UNLIMITED);
             _indexReader = _indexWriter.GetReader();
@@ -204,7 +203,7 @@ namespace Stockpile.DataProvider.Lucandrew
         {
             if (!_indexReader.IsCurrent())
             {
-                _indexReader = _indexReader.Reopen();
+                _indexReader = _indexWriter.GetReader();
                 _searcher = new IndexSearcher(_indexReader);
             }
         }

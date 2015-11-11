@@ -5,7 +5,7 @@ using Microsoft.Dnx.Runtime;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Stockpile.Api.App;
-using Stockpile.DataProvider.Redis;
+using Stockpile.DataProvider.Lucandrew;
 using Stockpile.Sdk.Interfaces;
 
 namespace Stockpile.Api.Controllers
@@ -30,7 +30,7 @@ namespace Stockpile.Api.Controllers
                 if (_dataProvider == null)
                 {
                     Logger.LogDebug(string.Format("DataProviderConnectionString: '{0}'", _stockpileOptions.DataProviderConnectionString));
-                    _dataProvider = new RedisDataProvider(_stockpileOptions.DataProviderConnectionString);
+                    _dataProvider = new LucandrewDataProvider(_stockpileOptions.DataProviderConnectionString);
                 }
                 return _dataProvider;
             }
