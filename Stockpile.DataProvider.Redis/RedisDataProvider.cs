@@ -9,27 +9,7 @@ namespace Stockpile.DataProvider.Redis
 {
     public class RedisDataProvider: IDataProvider, IDisposable
     {
-        protected ConnectionMultiplexer Muxer
-        {
-            get
-            {
-                if (_connectionMultiplexer == null)
-                {
-                    _connectionMultiplexer = ConnectionMultiplexer.Connect(_connectionString);
-                    int loops = 0;
-                    while (!_connectionMultiplexer.IsConnected)
-                    {
-                        if(loops > 10)
-                            throw new ApplicationException("Could not become connected.");
-                        Thread.Sleep(100);
-                        loops++;
-                    }
-                        
-                }
-
-                return _connectionMultiplexer;
-            }
-        }
+        protected static ConnectionMultiplexer Muxer { get; set; }
 
         protected IDatabase Database
         {
@@ -41,19 +21,18 @@ namespace Stockpile.DataProvider.Redis
             get { return _packer ?? (_packer = new ObjectPacker()); }
         }
 
-        private static ConnectionMultiplexer _connectionMultiplexer;
         private static ObjectPacker _packer;
-        private readonly string _connectionString;
-
+        
         public RedisDataProvider(string connectionString)
         {
-            _connectionString = connectionString;
+            if(Muxer == null)
+                Muxer = ConnectionMultiplexer.Connect(connectionString);
         }
 
         public void Dispose()
         {
-            if(_connectionMultiplexer != null)
-                _connectionMultiplexer.Dispose();
+            if(Muxer != null)
+                Muxer.Dispose();
         }
 
         public Stock CreateStock(Stock stock)
