@@ -1,8 +1,5 @@
 ﻿using System;
-using System.IO;
-using System.Threading;
-using MsgPack;
-using StackExchange.Redis;
+using CSRedis;
 using Stockpile.Sdk.Interfaces;
 using Stockpile.Sdk.Models;
 
@@ -10,62 +7,49 @@ namespace Stockpile.DataProvider.Redis
 {
     public class RedisDataProvider: IDataProvider, IDisposable
     {
-        protected static ConnectionMultiplexer Muxer { get; set; }
 
-        protected IDatabase Database
+        protected RedisClient Client
         {
-            get { return Muxer.GetDatabase(); }
+            get { return _client ?? (_client = new RedisClient(_connectionString)); }
         }
-
-        protected ObjectPacker Packer
-        {
-            get { return _packer ?? (_packer = new ObjectPacker()); }
-        }
-
-        private static ObjectPacker _packer;
         
-        public RedisDataProvider(string connectionString, TextWriter writer = null)
-        {
-            if(Muxer == null)
-                Muxer = ConnectionMultiplexer.Connect(connectionString, writer);
-        }
+        private static RedisClient _client;
+        private readonly string _connectionString;
 
-        public void Dispose()
+        public RedisDataProvider(string connectionString)
         {
-            if(Muxer != null)
-                Muxer.Dispose();
+            _connectionString = connectionString;
         }
-
+        
         public Stock CreateStock(Stock stock)
         {
-            var id = Guid.NewGuid();
-            stock.Id = id;
-            var data = Packer.Pack(stock);
-
-            if(!Database.StringSet(id.ToByteArray(), data))
-                throw new ApplicationException("Could not store value.");
-
+            stock.Id = Guid.NewGuid();
+            Client.HMSet(stock.Id.ToString(), stock);
             return stock;
         }
 
         public Stock RetrieveStock(Guid id)
         {
-            byte[] data = Database.StringGet(id.ToByteArray());
-            if (data == null)
-                return null;
-            Stock stock = Packer.Unpack<Stock>(data);
-            return stock;
+            return Client.Exists(id.ToString()) ? Client.HGetAll<Stock>(id.ToString()) : null;
         }
 
         public bool UpdateStock(Guid id, Stock stock)
         {
-            var data = Packer.Pack(stock);
-            return Database.StringSet(id.ToByteArray(), data);
+            Client.HMSet(id.ToString(), stock);
+            return true;
         }
 
         public bool DeleteStock(Guid id)
         {
-            return UpdateStock(id, null);
+            var result = Client.Del(id.ToString());
+            return result >= 0;
         }
+
+        public void Dispose()
+        {
+            if (_client != null)
+                _client.Dispose();
+        }
+
     }
 }

@@ -30,8 +30,7 @@ namespace Stockpile.Api.Controllers
                 if (_dataProvider == null)
                 {
                     Logger.LogDebug(string.Format("DataProviderConnectionString: '{0}'", _stockpileOptions.DataProviderConnectionString));
-                    _dataProvider = new RedisDataProvider(_stockpileOptions.DataProviderConnectionString, _stringWriter);
-                    Logger.LogDebug(_stringWriter.ToString());
+                    _dataProvider = new RedisDataProvider(_stockpileOptions.DataProviderConnectionString);
                 }
                 return _dataProvider;
             }
