@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using MsgPack;
 using StackExchange.Redis;
 using Stockpile.Sdk.Interfaces;
@@ -12,8 +13,21 @@ namespace Stockpile.DataProvider.Redis
         {
             get
             {
-                return _connectionMultiplexer ??
-                       (_connectionMultiplexer = ConnectionMultiplexer.Connect(_connectionString));
+                if (_connectionMultiplexer == null)
+                {
+                    _connectionMultiplexer = ConnectionMultiplexer.Connect(_connectionString);
+                    int loops = 0;
+                    while (!_connectionMultiplexer.IsConnected)
+                    {
+                        if(loops > 10)
+                            throw new ApplicationException("Could not become connected.");
+                        Thread.Sleep(100);
+                        loops++;
+                    }
+                        
+                }
+
+                return _connectionMultiplexer;
             }
         }
 
