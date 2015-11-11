@@ -4,9 +4,6 @@ using Microsoft.AspNet.Hosting;
 using Microsoft.Framework.Configuration;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Logging;
-using Stockpile.Api.Controllers;
-using Stockpile.DataProvider.Lucandrew;
-using Stockpile.Sdk.Interfaces;
 
 namespace Stockpile.Api.App
 {

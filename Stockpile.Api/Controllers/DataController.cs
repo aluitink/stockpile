@@ -18,9 +18,13 @@ namespace Stockpile.Api.Controllers
 
         // GET api/data/5
         [HttpGet("{id}")]
-        public FileStreamResult Get(Guid id)
+        public ActionResult Get(Guid id)
         {
             var stock = DataProvider.RetrieveStock(id);
+
+            if (stock == null)
+                return new HttpNotFoundResult();
+
             var stream = StorageAdapter.Read(stock.ExternalStorageKey);
 
             return new FileStreamResult(stream, "application/octet-stream");
@@ -48,31 +52,43 @@ namespace Stockpile.Api.Controllers
 
         // PUT api/data/5
         [HttpPut("{id}")]
-        public async Task<bool> Put(Guid id)
+        public async Task<ActionResult> Put(Guid id)
         {
             using (var tempStream = GetTempFileStream())
             {
+                var stock = DataProvider.RetrieveStock(id);
+
+                if (stock == null)
+                    return new HttpNotFoundResult();
+
                 await HttpContextService.HttpContext.Request.Body.CopyToAsync(tempStream);
                 tempStream.Position = 0;
 
-                var stock = DataProvider.RetrieveStock(id);
+                if (!StorageAdapter.Update(stock.ExternalStorageKey, tempStream))
+                    throw new ApplicationException("Could not update stock.");
 
-                return StorageAdapter.Update(stock.ExternalStorageKey, tempStream);
+                return new HttpOkResult();
             }
         }
 
         // DELETE api/data/5
         [HttpDelete("{id}")]
-        public bool Delete(Guid id)
+        public ActionResult Delete(Guid id)
         {
             var stock = DataProvider.RetrieveStock(id);
+
+            if (stock == null)
+                return new HttpOkResult();
 
             var success = StorageAdapter.Delete(stock.ExternalStorageKey);
 
             if(success)
                 success &= DataProvider.DeleteStock(id);
 
-            return success;
+            if (!success)
+                throw new ApplicationException("Could not delete stock.");
+
+            return new HttpOkResult();
         }
     }
 }

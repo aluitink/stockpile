@@ -5,7 +5,7 @@ using Microsoft.Dnx.Runtime;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Stockpile.Api.App;
-using Stockpile.DataProvider.Lucandrew;
+using Stockpile.DataProvider.Redis;
 using Stockpile.Sdk.Interfaces;
 
 namespace Stockpile.Api.Controllers
@@ -27,13 +27,12 @@ namespace Stockpile.Api.Controllers
         {
             get
             {
-                return _dataProvider ?? (_dataProvider = new LucandrewDataProvider(_stockpileOptions.DataProviderConnectionString));
+                return _dataProvider ?? (_dataProvider = new RedisDataProvider(_stockpileOptions.DataProviderConnectionString));
             }
         }
 
         protected readonly ILogger Logger;
-
-
+        
         private IStorageAdapter _storageAdapter;
         private static IDataProvider _dataProvider;
         private readonly StockpileOptions _stockpileOptions;

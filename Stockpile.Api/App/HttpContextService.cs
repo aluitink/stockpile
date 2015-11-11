@@ -1,6 +1,6 @@
 using Microsoft.AspNet.Http;
 
-namespace Stockpile.Api.Controllers
+namespace Stockpile.Api.App
 {
     public class HttpContextService
     {

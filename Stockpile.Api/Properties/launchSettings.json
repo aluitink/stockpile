@@ -17,7 +17,7 @@
     "kestrel": {
       "commandName": "kestrel",
       "environmentVariables": {
-        "DataProviderConnectionString": "DATA=C:\\Temp\\stockpile\\provider",
+        "DataProviderConnectionString": "192.168.1.15:6379",
         "StorageAdapter": "Stockpile.StorageAdapter.FileSystem",
         "StorageAdapterConnectionString": "DATA=C:\\Temp\\stockpile\\data"
       }
