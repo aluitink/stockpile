@@ -14,7 +14,7 @@ namespace Stockpile.Api.App
 
         public void OnException(ExceptionContext context)
         {
-            _logger.LogCritical(context.ToString());
+            _logger.LogCritical("Uncaught Exception", context.Exception);
         }
     }
 }

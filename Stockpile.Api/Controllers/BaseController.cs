@@ -27,7 +27,12 @@ namespace Stockpile.Api.Controllers
         {
             get
             {
-                return _dataProvider ?? (_dataProvider = new RedisDataProvider(_stockpileOptions.DataProviderConnectionString));
+                if (_dataProvider == null)
+                {
+                    Logger.LogDebug(string.Format("DataProviderConnectionString: '{0}'", _stockpileOptions.DataProviderConnectionString));
+                    _dataProvider = new RedisDataProvider(_stockpileOptions.DataProviderConnectionString);
+                }
+                return _dataProvider;
             }
         }
 
