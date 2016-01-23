@@ -20,9 +20,10 @@ namespace Stockpile.Api.App
             var configFile = "config.json";
             if (File.Exists(configFile))
                 builder.AddJsonFile(configFile);
-
-            builder.AddEnvironmentVariables();
-
+            
+            if (env.IsProduction())                
+                builder.AddEnvironmentVariables();
+            
             Configuration = builder.Build();
         }
 

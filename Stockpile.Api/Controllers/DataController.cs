@@ -11,7 +11,6 @@ namespace Stockpile.Api.Controllers
 {
     public class DataController : BaseController
     {
-        private static object _sync = new object();
         public DataController(HttpContextService httpContextService, IOptions<StockpileOptions> stockpileOptions)
             : base(httpContextService, stockpileOptions) { }
 

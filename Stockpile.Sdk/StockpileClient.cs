@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -13,17 +11,16 @@ namespace Stockpile.Sdk
 
         public StockpileClient(string baseAddress)
         {
-            if (_client == null)
-                _client = new HttpClient();
-
-            _client.BaseAddress = new Uri(string.Format("{0}/api/", baseAddress));
+            _client = new HttpClient();
+            _client.BaseAddress = new Uri(string.Format("{0}/api/", baseAddress.TrimEnd('/')));
         }
 
         protected StockpileClient(string baseAddress, HttpClient client = null)
-            : this(baseAddress)
         {
-            _client = client;
+            _client = client ?? new HttpClient();
+            _client.BaseAddress = new Uri(string.Format("{0}/api/", baseAddress.TrimEnd('/')));
         }
+
 
         public async Task<Guid> CreateAsync(Stream stream)
         {

@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
   "description": "Stockpile.Api.Test Class Library",
   "authors": [ "Andrew" ],
@@ -7,8 +7,9 @@
   "licenseUrl": "",
   "dependencies": {
     "Microsoft.AspNet.TestHost": "1.0.0-rc1-final",
-    "Moq": "4.2.1507.118",
+    "Moq": "4.2.1510.2205",
     "Stockpile.Api": "1.0.0-*",
+    "Stockpile.Sdk": "1.0.0-*",
     "xunit": "2.1.0",
     "xunit.runner.dnx": "2.1.0-rc1-build204"
   },
