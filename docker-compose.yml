@@ -1,0 +1,12 @@
+stockpile:
+  build: .
+  ports:
+   - "5000:5000"
+  volumes:
+   - /var/data/stockpile:/data:rw
+   - /var/data/stockpile/logs:/var/log/stockpile:rw
+  environment:
+   - StorageAdapter=Stockpile.StorageAdapter.FileSystem
+   - StorageAdapterConnectionString=DATA=/data/store
+   - DataProviderConnectionString=DATA=/data/db
+   - LoggingDirectory=/var/log/stockpile
