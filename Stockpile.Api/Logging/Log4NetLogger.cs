@@ -4,9 +4,10 @@ using log4net;
 using log4net.Config;
 using log4net.Core;
 using Microsoft.Framework.Logging;
+using Stockpile.Api.App;
 using ILogger = Microsoft.Framework.Logging.ILogger;
 
-namespace Stockpile.Api.App
+namespace Stockpile.Api.Logging
 {
     public class Log4NetLogger : ILogger
     {

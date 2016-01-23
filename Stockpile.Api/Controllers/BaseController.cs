@@ -27,17 +27,19 @@ namespace Stockpile.Api.Controllers
         {
             get
             {
-                if (_dataProvider == null)
+                lock (Sync)
                 {
-                    Logger.LogDebug(string.Format("DataProviderConnectionString: '{0}'", _stockpileOptions.DataProviderConnectionString));
-                    _dataProvider = new LucandrewDataProvider(_stockpileOptions.DataProviderConnectionString);
+                    if (_dataProvider == null)
+                    {
+                        Logger.LogDebug(string.Format("DataProviderConnectionString: '{0}'", _stockpileOptions.DataProviderConnectionString));
+                        _dataProvider = new LucandrewDataProvider(_stockpileOptions.DataProviderConnectionString);
+                    }
                 }
                 return _dataProvider;
             }
         }
-
+        private static object Sync = new object();
         protected readonly ILogger Logger;
-        private StringWriter _stringWriter = new StringWriter();
         private IStorageAdapter _storageAdapter;
         private static IDataProvider _dataProvider;
         private readonly StockpileOptions _stockpileOptions;

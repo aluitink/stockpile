@@ -2,7 +2,7 @@
 using log4net;
 using Microsoft.Framework.Logging;
 
-namespace Stockpile.Api.App
+namespace Stockpile.Api.Logging
 {
     public class Log4NetLoggerProvider : ILoggerProvider
     {

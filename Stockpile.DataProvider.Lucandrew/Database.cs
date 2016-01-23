@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -25,8 +27,8 @@ namespace Stockpile.DataProvider.Lucandrew
         private const string IdKey = "_ID";
         private const Lucene.Net.Util.Version Version = Lucene.Net.Util.Version.LUCENE_30;
 
-        private readonly List<object> _loopDetector = new List<object>();
-
+        private readonly ConcurrentDictionary<object, bool> _loopDetector = new ConcurrentDictionary<object, bool>();
+        private static object _sync = new object();
         public Database(string path)
         {
             _path = path;
@@ -66,11 +68,22 @@ namespace Stockpile.DataProvider.Lucandrew
 
             Query query = GetQueryFromObject(obj, objectClass);
 
-            TopDocs docs = _searcher.Search(query, _searcher.MaxDoc > 0 ? _searcher.MaxDoc : int.MaxValue);
+            TopDocs docs;
+
+            lock(_sync)
+                docs = _searcher.Search(query, _searcher.MaxDoc > 0 ? _searcher.MaxDoc : int.MaxValue);
+
+            if (docs == null)
+                yield break;
 
             foreach (ScoreDoc scoreDoc in docs.ScoreDocs)
             {
-                yield return GetObjectFromDocument<T>(_searcher.Doc(scoreDoc.Doc));
+                Document doc;
+
+                lock(_sync)
+                    doc = _searcher.Doc(scoreDoc.Doc);
+
+                yield return GetObjectFromDocument<T>(doc);
             }
         }
 
@@ -132,9 +145,11 @@ namespace Stockpile.DataProvider.Lucandrew
 
         private Dictionary<string, string> GetPropertiesFromObject(object obj)
         {
-            if (_loopDetector.Contains(obj) || obj == null)
+            if (obj == null || _loopDetector.ContainsKey(obj))
                 return null;
-            _loopDetector.Add(obj);
+            if (!_loopDetector.TryAdd(obj, true))
+                throw new ApplicationException("Add failed.");
+
             Dictionary<string, string> properties = new Dictionary<string, string>();
 
             Type objectType = obj.GetType();
@@ -170,7 +185,9 @@ namespace Stockpile.DataProvider.Lucandrew
                 if (value != null)
                     properties.Add(propertyInfo.Name, value.ToString());
             }
-            _loopDetector.Remove(obj);
+            bool loopClosed;
+            if (!_loopDetector.TryRemove(obj, out loopClosed))
+                throw new ApplicationException("Could not remove.");
             return properties;
         }
 
@@ -201,11 +218,15 @@ namespace Stockpile.DataProvider.Lucandrew
 
         private void ReopenIndexIfNeeded()
         {
-            if (!_indexReader.IsCurrent())
+            lock(_sync)
             {
-                _indexReader = _indexWriter.GetReader();
-                _searcher = new IndexSearcher(_indexReader);
+                if (!_indexReader.IsCurrent())
+                {
+                    _indexReader = _indexWriter.GetReader();
+                    _searcher = new IndexSearcher(_indexReader);
+                }
             }
+            
         }
 
         public void Dispose()

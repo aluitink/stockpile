@@ -1,7 +1,7 @@
 ﻿using System;
 using log4net;
 
-namespace Stockpile.Api.App
+namespace Stockpile.Api.Logging
 {
     public static class LogExtentions
     {

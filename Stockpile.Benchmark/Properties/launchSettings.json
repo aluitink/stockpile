@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Stockpile.Benchmark": {
+      "commandName": "Stockpile.Benchmark",
+      "commandLineArgs": "http://localhost:5000"
+    }
+  }
+}

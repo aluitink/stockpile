@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Stockpile.Sdk.Interfaces;
 using Stockpile.Sdk.Models;
+using Stockpile.Sdk.Utilities;
 
 namespace Stockpile.DataProvider.Lucandrew
 {
@@ -54,59 +55,71 @@ namespace Stockpile.DataProvider.Lucandrew
 
         public Stock CreateStock(Stock stock)
         {
-            stock.Id = Guid.NewGuid();
-            var objectReference = _database.Store(stock);
-            return objectReference.Object;
+            return Retry.Do(() =>
+            {
+                stock.Id = Guid.NewGuid();
+                var objectReference = _database.Store(stock);
+                return objectReference.Object;
+            }, TimeSpan.FromMilliseconds(100));
         }
 
         public Stock RetrieveStock(Guid id)
         {
-            var retVal = _database.Search<Stock>(new {Id = id});
+            return Retry.Do(() =>
+            {
+                var retVal = _database.Search<Stock>(new { Id = id });
 
-            if (retVal == null)
-                return null;
-            
-            var reference = retVal.FirstOrDefault();
+                if (retVal == null)
+                    return null;
 
-            if (reference == null)
-                return null;
+                var reference = retVal.FirstOrDefault();
 
-            return reference.Object;
+                if (reference == null)
+                    return null;
+
+                return reference.Object;
+            }, TimeSpan.FromMilliseconds(100));
         }
 
         public bool UpdateStock(Guid id, Stock stock)
         {
-            var existingReferences = _database.Search<Stock>(new {Id = id});
+            return Retry.Do(() =>
+            {
+                var existingReferences = _database.Search<Stock>(new { Id = id });
 
-            if (existingReferences == null)
-                return false;
+                if (existingReferences == null)
+                    return false;
 
-            var existingReference = existingReferences.FirstOrDefault();
+                var existingReference = existingReferences.FirstOrDefault();
 
-            if (existingReference == null)
-                return false;
+                if (existingReference == null)
+                    return false;
 
-            existingReference.Object.ExternalStorageKey = stock.ExternalStorageKey;
-            existingReference.Update();
+                existingReference.Object.ExternalStorageKey = stock.ExternalStorageKey;
+                existingReference.Update();
 
-            return true;
+                return true;
+            }, TimeSpan.FromMilliseconds(100));
         }
 
         public bool DeleteStock(Guid id)
         {
-            var existingReferences = _database.Search<Stock>(new { Id = id });
+            return Retry.Do(() =>
+            {
+                var existingReferences = _database.Search<Stock>(new { Id = id });
 
-            if (existingReferences == null)
-                return false;
+                if (existingReferences == null)
+                    return false;
 
-            var existingReference = existingReferences.FirstOrDefault();
+                var existingReference = existingReferences.FirstOrDefault();
 
-            if (existingReference == null)
-                return false;
+                if (existingReference == null)
+                    return false;
 
-            existingReference.Delete();
+                existingReference.Delete();
 
-            return true;
+                return true;
+            }, TimeSpan.FromMilliseconds(100));
         }
     }
 }

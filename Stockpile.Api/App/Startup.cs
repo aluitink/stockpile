@@ -5,6 +5,7 @@ using Microsoft.Framework.Configuration;
 using Microsoft.Framework.DependencyInjection;
 using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
+using Stockpile.Api.Logging;
 
 namespace Stockpile.Api.App
 {
@@ -48,7 +49,17 @@ namespace Stockpile.Api.App
             loggerFactory.AddProvider(new Log4NetLoggerProvider(new FileInfo(webConfigPath), new DirectoryInfo(logRootDirPath)));
             loggerFactory.AddConsole();
             loggerFactory.AddDebug();
-            
+
+            app.Use(next => async context =>
+            {
+                // do your stuff here before calling the next middleware 
+                // in the pipeline
+
+                await next.Invoke(context); // call the next guy
+
+                // do some more stuff here as the call is unwinding
+            });
+
             // Add MVC to the request pipeline.
             app.UseMvc();
         }

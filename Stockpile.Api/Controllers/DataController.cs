@@ -5,11 +5,13 @@ using Microsoft.Framework.Logging;
 using Microsoft.Framework.OptionsModel;
 using Stockpile.Api.App;
 using Stockpile.Sdk.Models;
+using Stockpile.Sdk.Utilities;
 
 namespace Stockpile.Api.Controllers
 {
     public class DataController : BaseController
     {
+        private static object _sync = new object();
         public DataController(HttpContextService httpContextService, IOptions<StockpileOptions> stockpileOptions)
             : base(httpContextService, stockpileOptions) { }
 
@@ -23,10 +25,20 @@ namespace Stockpile.Api.Controllers
 
             if (stock != null)
             {
-                var stream = StorageAdapter.Read(stock.ExternalStorageKey);
-
-                Logger.LogDebug(string.Format("Leaving Get({0})", id));
-                return new FileStreamResult(stream, "application/octet-stream");
+                try
+                {
+                    var stream = StorageAdapter.Read(stock.ExternalStorageKey);
+                    return new FileStreamResult(stream, "application/octet-stream");
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError("File not found.", e);
+                    return new HttpNotFoundResult();
+                }
+                finally
+                {
+                    Logger.LogDebug(string.Format("Leaving Get({0})", id));
+                }
             }
 
             Logger.LogDebug(string.Format("Leaving Get({0}) - NotFound", id));
@@ -41,10 +53,13 @@ namespace Stockpile.Api.Controllers
             using (var tempStream = GetTempFileStream())
             {
                 await HttpContextService.HttpContext.Request.Body.CopyToAsync(tempStream);
-
-                tempStream.Position = 0;
-
-                var storageKey = StorageAdapter.Create(tempStream);
+                
+                string storageKey = Retry.Do(() =>
+                {
+                    tempStream.Position = 0;
+                    return StorageAdapter.Create(tempStream);
+                }, TimeSpan.FromMilliseconds(200));
+                
                 Stock stock = new Stock();
                 stock.ExternalStorageKey = storageKey;
 

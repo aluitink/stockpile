@@ -17,6 +17,8 @@ namespace Stockpile.StorageAdapter.FileSystem
         private Stream _indexStream;
 
         private static EventWaitHandle _crossProcessWaitHandle = new EventWaitHandle(true, EventResetMode.AutoReset, "4D1EDE25-7550-4CDA-AC2E-7C85B110B7FE");
+        
+        private static object _sync = new object();
 
         public FileSystemAdapter(string connectionString)
         {
@@ -31,32 +33,35 @@ namespace Stockpile.StorageAdapter.FileSystem
 
             string nextFilePath = null;
             string key = null;
-
-            _crossProcessWaitHandle.WaitOne();
-            long previousIndex = _indexCurrentValue;
-            try
+            
+            lock (_sync)
             {
-                do
+                _crossProcessWaitHandle.WaitOne();
+                long previousIndex = _indexCurrentValue;
+                try
                 {
-                    key = GetNextKey();
-                    var nextFile = KeyToPath(key);
-                    nextFilePath = Path.Combine(RootPath, nextFile);
-                    if (File.Exists(nextFilePath))
-                        WriteValue(_indexCurrentValue);
-                } while (File.Exists(nextFilePath));
-                //Update Index
-                WriteValue(_indexCurrentValue);
-            }
-            catch (IOException ex)
-            {
-                _indexCurrentValue = previousIndex;
-                throw;
-            }
-            finally
-            {
-                _crossProcessWaitHandle.Set();
-            }
+                    do
+                    {
+                        key = GetNextKey();
+                        var nextFile = KeyToPath(key);
+                        nextFilePath = Path.Combine(RootPath, nextFile);
+                        if (File.Exists(nextFilePath))
+                            WriteValue(_indexCurrentValue);
+                    } while (File.Exists(nextFilePath));
+                    //Update Index
+                    WriteValue(_indexCurrentValue);
 
+                }
+                catch (IOException ex)
+                {
+                    _indexCurrentValue = previousIndex;
+                    throw;
+                }
+                finally
+                {
+                    _crossProcessWaitHandle.Set();
+                }
+            }
 
             if (!WriteFile(nextFilePath, data).Result)
                 throw new ApplicationException("Could not write file.");
@@ -67,6 +72,8 @@ namespace Stockpile.StorageAdapter.FileSystem
         public Stream Read(string key)
         {
             var path = KeyToPath(key);
+            if(!File.Exists(path))
+                throw new FileNotFoundException("Could not find file.", path);
             return new FileStream(path, FileMode.Open, FileAccess.Read);
         }
 
@@ -152,21 +159,27 @@ namespace Stockpile.StorageAdapter.FileSystem
 
         private void WriteValue(long value)
         {
-            byte[] currentValue = BitConverter.GetBytes(value);
+            lock (_sync)
+            {
+                byte[] currentValue = BitConverter.GetBytes(value);
 
-            _indexStream.Position = 0;
-            _indexStream.Write(currentValue, 0, 8);
+                _indexStream.Position = 0;
+                _indexStream.Write(currentValue, 0, 8);
+            }
         }
 
         private void ReadValue()
         {
-            byte[] currentValue = new byte[8];
+            lock (_sync)
+            {
+                byte[] currentValue = new byte[8];
 
-            _indexStream.Position = 0;
-            var i = _indexStream.Read(currentValue, 0, currentValue.Length);
-            if (i <= 0)
-                throw new ApplicationException("could not read from stream.");
-            _indexCurrentValue = BitConverter.ToInt32(currentValue, 0);
+                _indexStream.Position = 0;
+                var i = _indexStream.Read(currentValue, 0, currentValue.Length);
+                if (i <= 0)
+                    throw new ApplicationException("could not read from stream.");
+                _indexCurrentValue = BitConverter.ToInt32(currentValue, 0);
+            }
         }
 
 
