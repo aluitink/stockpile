@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using log4net;
-using Microsoft.Framework.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Stockpile.Api.Logging
 {

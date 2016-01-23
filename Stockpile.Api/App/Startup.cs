@@ -1,10 +1,10 @@
 ﻿using System.IO;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
-using Microsoft.Framework.Configuration;
-using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.Logging;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.OptionsModel;
 using Stockpile.Api.Logging;
 
 namespace Stockpile.Api.App
@@ -37,6 +37,7 @@ namespace Stockpile.Api.App
             {
                 options.Filters.Add(typeof(LastChanceExceptionHandler));
             });
+
         }
 
         // Configure is called after ConfigureServices is called.
@@ -49,7 +50,7 @@ namespace Stockpile.Api.App
             loggerFactory.AddProvider(new Log4NetLoggerProvider(new FileInfo(webConfigPath), new DirectoryInfo(logRootDirPath)));
             loggerFactory.AddConsole();
             loggerFactory.AddDebug();
-
+            
             app.Use(next => async context =>
             {
                 // do your stuff here before calling the next middleware 

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
-using Microsoft.Framework.Logging;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.Extensions.OptionsModel;
 using Stockpile.Api.App;
 using Stockpile.Sdk.Models;
 using Stockpile.Sdk.Utilities;
+using Microsoft.Extensions.Logging;
 
 namespace Stockpile.Api.Controllers
 {

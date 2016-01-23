@@ -73,6 +73,7 @@ namespace Stockpile.Benchmark
             {
                 for (int i = 0; i < count; i++)
                 {
+                    
                     try
                     {
                         r.NextBytes(data);

@@ -1,5 +1,5 @@
 using Microsoft.AspNet.Mvc.Filters;
-using Microsoft.Framework.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Stockpile.Api.App
 {

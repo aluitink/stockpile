@@ -1,9 +1,8 @@
-using System;
 using System.IO;
 using Microsoft.AspNet.Mvc;
-using Microsoft.Dnx.Runtime;
-using Microsoft.Framework.Logging;
-using Microsoft.Framework.OptionsModel;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.OptionsModel;
+using Microsoft.Extensions.PlatformAbstractions;
 using Stockpile.Api.App;
 using Stockpile.DataProvider.Lucandrew;
 using Stockpile.Sdk.Interfaces;
