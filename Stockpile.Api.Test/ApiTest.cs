@@ -14,6 +14,50 @@ namespace Stockpile.Api.Test
     public class ApiTest
     {
         [Fact]
+        public void CRUD_LinuxServer()
+        {
+            var stockpileClient = new StockpileClient("http://stockpile.aluitink.io");
+
+            Random r = new Random();
+            byte[] expectedBytes = new byte[1024 + 1024];
+
+            r.NextBytes(expectedBytes);
+
+            var stockId = stockpileClient.CreateAsync(new MemoryStream(expectedBytes)).Result;
+
+            Assert.NotEqual(Guid.Empty, stockId);
+
+            using (var stream = stockpileClient.RetrieveAsync(stockId).Result)
+            {
+                Assert.NotNull(stream);
+
+                var actualBytes = StreamToBytesAsync(stream).Result;
+
+                Assert.NotNull(actualBytes);
+
+                Assert.True(CheckData(expectedBytes, actualBytes));
+            }
+
+            r.NextBytes(expectedBytes);
+
+            stockpileClient.UpdateAsync(stockId, new MemoryStream(expectedBytes)).Wait();
+
+            using (var stream = stockpileClient.RetrieveAsync(stockId).Result)
+            {
+                Assert.NotNull(stream);
+
+                var actualBytes = StreamToBytesAsync(stream).Result;
+
+                Assert.NotNull(actualBytes);
+
+                Assert.True(CheckData(expectedBytes, actualBytes));
+            }
+
+            stockpileClient.DeleteAsync(stockId).Wait();
+            Assert.ThrowsAny<Exception>(() => stockpileClient.RetrieveAsync(stockId).Result);
+        }
+
+        [Fact]
         public void CRUD_Basic()
         {
             using (var testServer = CreateServer())

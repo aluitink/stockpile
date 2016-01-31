@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9DE49569-A467-46D4-A992-C3A4D13DC6E8}"
 	ProjectSection(SolutionItems) = preProject
 		Dockerfile = Dockerfile
+		supervisord.conf = supervisord.conf
 	EndProjectSection
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Stockpile.DataProvider.Lucandrew", "Stockpile.DataProvider.Lucandrew\Stockpile.DataProvider.Lucandrew.xproj", "{A8D76DF7-E001-4981-9564-94A78BE1C954}"

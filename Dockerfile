@@ -1,5 +1,9 @@
 FROM microsoft/aspnet:1.0.0-rc1-update1
 
+RUN apt-get update && apt-get install -y supervisor
+
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY Debugger /opt/stockpile/Debugger
 
 COPY Stockpile.Sdk/project.json /opt/stockpile/Stockpile.Sdk/
 COPY Stockpile.DataProvider.Lucandrew/project.json /opt/stockpile/Stockpile.DataProvider.Lucandrew/
@@ -27,9 +31,10 @@ RUN mkdir /data
 RUN mkdir /data/db
 RUN mkdir /data/store
 RUN mkdir /var/log/stockpile
+RUN mkdir /var/log/supervisor
 
 VOLUME ["/data"]
 
-EXPOSE 5000
+EXPOSE 80 13001
 
-ENTRYPOINT dnx -p project.json --configuration Release kestrel
+CMD ["/usr/bin/supervisord"]

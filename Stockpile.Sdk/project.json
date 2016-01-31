@@ -1,7 +1,7 @@
 {
-  "version": "1.0.0-*",
+  "version": "1.0.1-*",
   "description": "Stockpile.Sdk Class Library",
-  "authors": [ "Andrew" ],
+  "authors": [ "Andrew Luitink" ],
   "tags": [ "" ],
   "projectUrl": "",
   "licenseUrl": "",

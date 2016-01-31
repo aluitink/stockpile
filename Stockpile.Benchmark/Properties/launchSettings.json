@@ -2,7 +2,7 @@
   "profiles": {
     "Stockpile.Benchmark": {
       "commandName": "Stockpile.Benchmark",
-      "commandLineArgs": "http://localhost:5000"
+      "commandLineArgs": "http://192.168.1.15:5000"
     }
   }
 }
