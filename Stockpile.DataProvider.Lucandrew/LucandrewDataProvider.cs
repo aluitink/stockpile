@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Stockpile.Sdk.Interfaces;
 using Stockpile.Sdk.Models;
 using Stockpile.Sdk.Utilities;
@@ -53,18 +51,32 @@ namespace Stockpile.DataProvider.Lucandrew
             }
         }
 
-        public Stock CreateStock(Stock stock)
+        public Stock CreateStock(Stock stock, string stockKey = null)
         {
             return Retry.Do(() =>
             {
-                stock.Id = Guid.NewGuid();
+                var stockId = Guid.NewGuid();
+
+                if (!string.IsNullOrWhiteSpace(stockKey))
+                {
+                    StockKey stockKeyObject = new StockKey();
+                    stockKeyObject.Key = stockKey;
+                    stockKeyObject.StockId = stockId;
+                    var stockKeyObjectReference = _database.Store(stockKeyObject);
+                    if(stockKeyObjectReference == null)
+                        throw new ApplicationException("Could not store StockKey");
+                }
+
+                stock.Id = stockId;
                 var objectReference = _database.Store(stock);
                 return objectReference.Object;
             }, TimeSpan.FromMilliseconds(100));
         }
 
-        public Stock RetrieveStock(Guid id)
+        public Stock RetrieveStock(Guid id, string stockKey = null)
         {
+            ThrowIfNotAuthorized(id, stockKey);
+
             return Retry.Do(() =>
             {
                 var retVal = _database.Search<Stock>(new { Id = id });
@@ -81,8 +93,10 @@ namespace Stockpile.DataProvider.Lucandrew
             }, TimeSpan.FromMilliseconds(100));
         }
 
-        public bool UpdateStock(Guid id, Stock stock)
+        public bool UpdateStock(Guid id, Stock stock, string stockKey = null)
         {
+            ThrowIfNotAuthorized(id, stockKey);
+
             return Retry.Do(() =>
             {
                 var existingReferences = _database.Search<Stock>(new { Id = id });
@@ -102,8 +116,10 @@ namespace Stockpile.DataProvider.Lucandrew
             }, TimeSpan.FromMilliseconds(100));
         }
 
-        public bool DeleteStock(Guid id)
+        public bool DeleteStock(Guid id, string stockKey = null)
         {
+            ThrowIfNotAuthorized(id, stockKey);
+
             return Retry.Do(() =>
             {
                 var existingReferences = _database.Search<Stock>(new { Id = id });
@@ -120,6 +136,22 @@ namespace Stockpile.DataProvider.Lucandrew
 
                 return true;
             }, TimeSpan.FromMilliseconds(100));
+        }
+
+        private void ThrowIfNotAuthorized(Guid id, string stockKey)
+        {
+            var authorized = Retry.Do(() =>
+            {
+                var stockKeyObjectReference = _database.Search<StockKey>(new { StockId = id }).FirstOrDefault();
+                if (stockKeyObjectReference == null)
+                    return string.IsNullOrWhiteSpace(stockKey);
+
+                return stockKeyObjectReference.Object.Key == stockKey;
+
+            }, TimeSpan.FromMilliseconds(100));
+
+            if (!authorized)
+                throw new UnauthorizedAccessException();
         }
     }
 }

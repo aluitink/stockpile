@@ -37,12 +37,15 @@ namespace Stockpile.Api.Controllers
                 return _dataProvider;
             }
         }
-        private static object Sync = new object();
         protected readonly ILogger Logger;
+
         private IStorageAdapter _storageAdapter;
         private static IDataProvider _dataProvider;
         private readonly StockpileOptions _stockpileOptions;
-        
+
+        private const string StockKeyHeader = "X-Stock-Key";
+        private static readonly object Sync = new object();
+
         public BaseController(HttpContextService httpContextService, IOptions<StockpileOptions> stockpileOptions)
         {
             if (httpContextService != null)
@@ -63,6 +66,19 @@ namespace Stockpile.Api.Controllers
                 _stockpileOptions = stockpileOptions.Value;
         }
 
+        public string GetStockKeyFromHeaders()
+        {
+            if (HttpContextService == null)
+                return null;
+
+            if (HttpContextService.HttpContext.Request.Headers.ContainsKey(StockKeyHeader))
+            {
+                return HttpContextService.HttpContext.Request.Headers[StockKeyHeader];
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Gets the temporary file stream.
         /// </summary>
@@ -70,7 +86,7 @@ namespace Stockpile.Api.Controllers
         /// <param name="options">The options.</param>
         /// <param name="bufferSize">Size of the buffer.</param>
         /// <returns></returns>
-        public static Stream GetTempFileStream(string path = null, FileOptions options = FileOptions.DeleteOnClose, int bufferSize = 8192)
+        public Stream GetTempFileStream(string path = null, FileOptions options = FileOptions.DeleteOnClose, int bufferSize = 8192)
         {
             var tempFile = Path.GetTempFileName();
             return new FileStream(tempFile, FileMode.Create, FileAccess.ReadWrite, FileShare.None, bufferSize, options);

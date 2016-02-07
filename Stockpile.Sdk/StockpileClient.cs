@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ namespace Stockpile.Sdk
     public class StockpileClient
     {
         private readonly HttpClient _client;
+        private const string StockKeyHeader = "X-Stock-Key";
 
         public StockpileClient(string baseAddress)
         {
@@ -22,9 +24,15 @@ namespace Stockpile.Sdk
         }
 
 
-        public async Task<Guid> CreateAsync(Stream stream)
+        public async Task<Guid> CreateAsync(Stream stream, string stockKey = null)
         {
-            var response = await _client.PostAsync("data", new StreamContent(stream));
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, "data");
+            requestMessage.Content = new StreamContent(stream);
+
+            if (!string.IsNullOrWhiteSpace(stockKey))
+                requestMessage.Headers.Add(StockKeyHeader, stockKey);
+
+            var response = await _client.SendAsync(requestMessage);
             if(!response.IsSuccessStatusCode)
                 throw new ApplicationException(response.ReasonPhrase);
             var responseString = await response.Content.ReadAsStringAsync();
@@ -32,23 +40,58 @@ namespace Stockpile.Sdk
             return Guid.Parse(responseString);
         }
 
-        public async Task<Stream> RetrieveAsync(Guid id)
+        public async Task<Stream> RetrieveAsync(Guid id, string stockKey = null)
         {
-            return await _client.GetStreamAsync(string.Format("data/{0}", id));
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, string.Format("data/{0}", id));
+
+            if (!string.IsNullOrWhiteSpace(stockKey))
+                requestMessage.Headers.Add(StockKeyHeader, stockKey);
+            var response = await _client.SendAsync(requestMessage);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                    throw new FileNotFoundException("Could not find Stock.", id.ToString());
+
+                throw new ApplicationException(response.ReasonPhrase);
+            }
+            
+            return await response.Content.ReadAsStreamAsync();
         }
 
-        public async Task UpdateAsync(Guid id, Stream stream)
+        public async Task UpdateAsync(Guid id, Stream stream, string stockKey = null)
         {
-            var response = await _client.PutAsync(string.Format("data/{0}", id), new StreamContent(stream));
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, string.Format("data/{0}", id));
+            requestMessage.Content = new StreamContent(stream);
+
+            if (!string.IsNullOrWhiteSpace(stockKey))
+                requestMessage.Headers.Add(StockKeyHeader, stockKey);
+
+            var response = await _client.SendAsync(requestMessage);
             if (!response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                    throw new FileNotFoundException("Could not find Stock.", id.ToString());
+
                 throw new ApplicationException(response.ReasonPhrase);
+            }
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id, string stockKey = null)
         {
-            var response = await _client.DeleteAsync(string.Format("data/{0}", id));
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Delete, string.Format("data/{0}", id));
+
+            if (!string.IsNullOrWhiteSpace(stockKey))
+                requestMessage.Headers.Add(StockKeyHeader, stockKey);
+
+            var response = await _client.SendAsync(requestMessage);
             if (!response.IsSuccessStatusCode)
+            {
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                    throw new FileNotFoundException("Could not find Stock.", id.ToString());
+
                 throw new ApplicationException(response.ReasonPhrase);
+            }
         }
     }
 }

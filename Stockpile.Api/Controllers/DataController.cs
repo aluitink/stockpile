@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Extensions.OptionsModel;
@@ -20,28 +21,35 @@ namespace Stockpile.Api.Controllers
         {
             Logger.LogDebug(string.Format("Entering Get({0})", id));
 
-            var stock = DataProvider.RetrieveStock(id);
-
-            if (stock != null)
+            try
             {
-                try
-                {
-                    var stream = StorageAdapter.Read(stock.ExternalStorageKey);
-                    return new FileStreamResult(stream, "application/octet-stream");
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError("File not found.", e);
-                    return new HttpNotFoundResult();
-                }
-                finally
-                {
-                    Logger.LogDebug(string.Format("Leaving Get({0})", id));
-                }
-            }
+                var stockKey = GetStockKeyFromHeaders();
+                var stock = DataProvider.RetrieveStock(id, stockKey);
+                if (stock == null)
+                    throw new FileNotFoundException("Could not retrieve Stock.", id.ToString());
 
-            Logger.LogDebug(string.Format("Leaving Get({0}) - NotFound", id));
-            return new HttpNotFoundResult();
+                var stream = StorageAdapter.Read(stock.ExternalStorageKey);
+                return new FileStreamResult(stream, "application/octet-stream");
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Logger.LogError("File not found.", e);
+                return new HttpNotFoundResult();
+            }
+            catch (FileNotFoundException e)
+            {
+                Logger.LogError("File not found.", e);
+                return new HttpNotFoundResult();
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("Unexpected error.", e);
+                return new HttpStatusCodeResult(500);
+            }
+            finally
+            {
+                Logger.LogDebug(string.Format("Leaving Get({0})", id));
+            }
         }
 
         // POST api/data
@@ -62,7 +70,9 @@ namespace Stockpile.Api.Controllers
                 Stock stock = new Stock();
                 stock.ExternalStorageKey = storageKey;
 
-                stock = DataProvider.CreateStock(stock);
+                var stockKey = GetStockKeyFromHeaders();
+
+                stock = DataProvider.CreateStock(stock, stockKey);
                 Logger.LogDebug("Leaving Post()");
                 return stock.Id;
             }
@@ -73,25 +83,44 @@ namespace Stockpile.Api.Controllers
         public async Task<ActionResult> Put(Guid id)
         {
             Logger.LogDebug(string.Format("Entering Put({0})", id));
-            using (var tempStream = GetTempFileStream())
+            try
             {
-                var stock = DataProvider.RetrieveStock(id);
-
-                if (stock != null)
+                using (var tempStream = GetTempFileStream())
                 {
+                    var stockKey = GetStockKeyFromHeaders();
+                    var stock = DataProvider.RetrieveStock(id, stockKey);
+                    if (stock == null)
+                        throw new FileNotFoundException("Could not retrieve Stock.", id.ToString());
+
                     await HttpContextService.HttpContext.Request.Body.CopyToAsync(tempStream);
                     tempStream.Position = 0;
 
                     if (!StorageAdapter.Update(stock.ExternalStorageKey, tempStream))
                         throw new ApplicationException("Could not update stock.");
 
-                    Logger.LogDebug(string.Format("Leaving Put({0})", id));
                     return new HttpOkResult();
                 }
-
-                Logger.LogDebug(string.Format("Leaving Put({0}) - NotFound", id));
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Logger.LogError("File not found.", e);
                 return new HttpNotFoundResult();
             }
+            catch (FileNotFoundException e)
+            {
+                Logger.LogError("File not found.", e);
+                return new HttpNotFoundResult();
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("Unexpected error.", e);
+                return new HttpStatusCodeResult(500);
+            }
+            finally
+            {
+                Logger.LogDebug(string.Format("Leaving Put({0})", id));
+            }
+            
         }
 
         // DELETE api/data/5
@@ -99,21 +128,43 @@ namespace Stockpile.Api.Controllers
         public ActionResult Delete(Guid id)
         {
             Logger.LogDebug(string.Format("Entering Delete({0})", id));
-            var stock = DataProvider.RetrieveStock(id);
 
-            if (stock != null)
+            try
             {
+                var stockKey = GetStockKeyFromHeaders();
+                var stock = DataProvider.RetrieveStock(id, stockKey);
+                if (stock == null)
+                    throw new FileNotFoundException("Could not retrieve Stock.", id.ToString());
+
                 var success = StorageAdapter.Delete(stock.ExternalStorageKey);
 
                 if (success)
-                    success &= DataProvider.DeleteStock(id);
+                    success &= DataProvider.DeleteStock(id, stockKey);
 
                 if (!success)
-                    throw new ApplicationException("Could not delete stock.");
+                    throw new ApplicationException("Could not delete Stock.");
+
+                return new HttpOkResult();
             }
-            
-            Logger.LogDebug(string.Format("Leaving Delete({0})", id));
-            return new HttpOkResult();
+            catch (UnauthorizedAccessException e)
+            {
+                Logger.LogError("File not found.", e);
+                return new HttpNotFoundResult();
+            }
+            catch (FileNotFoundException e)
+            {
+                Logger.LogError("File not found.", e);
+                return new HttpNotFoundResult();
+            }
+            catch (Exception e)
+            {
+                Logger.LogError("Unexpected error.", e);
+                return new HttpStatusCodeResult(500);
+            }
+            finally
+            {
+                Logger.LogDebug(string.Format("Leaving Delete({0})", id));
+            }
         }
     }
 }
