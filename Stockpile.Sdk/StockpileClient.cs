@@ -34,7 +34,7 @@ namespace Stockpile.Sdk
 
             var response = await _client.SendAsync(requestMessage);
             if(!response.IsSuccessStatusCode)
-                throw new ApplicationException(response.ReasonPhrase);
+                throw new Exception(response.ReasonPhrase);
             var responseString = await response.Content.ReadAsStringAsync();
             responseString = responseString.Replace("\"", "");
             return Guid.Parse(responseString);
@@ -53,7 +53,7 @@ namespace Stockpile.Sdk
                 if (response.StatusCode == HttpStatusCode.NotFound)
                     throw new FileNotFoundException("Could not find Stock.", id.ToString());
 
-                throw new ApplicationException(response.ReasonPhrase);
+                throw new Exception(response.ReasonPhrase);
             }
             
             return await response.Content.ReadAsStreamAsync();
@@ -73,7 +73,7 @@ namespace Stockpile.Sdk
                 if (response.StatusCode == HttpStatusCode.NotFound)
                     throw new FileNotFoundException("Could not find Stock.", id.ToString());
 
-                throw new ApplicationException(response.ReasonPhrase);
+                throw new Exception(response.ReasonPhrase);
             }
         }
 
@@ -90,7 +90,7 @@ namespace Stockpile.Sdk
                 if (response.StatusCode == HttpStatusCode.NotFound)
                     throw new FileNotFoundException("Could not find Stock.", id.ToString());
 
-                throw new ApplicationException(response.ReasonPhrase);
+                throw new Exception(response.ReasonPhrase);
             }
         }
     }

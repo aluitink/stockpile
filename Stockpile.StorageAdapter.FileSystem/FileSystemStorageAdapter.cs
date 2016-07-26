@@ -64,7 +64,7 @@ namespace Stockpile.StorageAdapter.FileSystem
             }
 
             if (!WriteFile(nextFilePath, data).Result)
-                throw new ApplicationException("Could not write file.");
+                throw new Exception("Could not write file.");
             return key;
         }
 
@@ -177,7 +177,7 @@ namespace Stockpile.StorageAdapter.FileSystem
                 _indexStream.Position = 0;
                 var i = _indexStream.Read(currentValue, 0, currentValue.Length);
                 if (i <= 0)
-                    throw new ApplicationException("could not read from stream.");
+                    throw new Exception("could not read from stream.");
                 _indexCurrentValue = BitConverter.ToInt32(currentValue, 0);
             }
         }

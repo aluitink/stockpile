@@ -36,7 +36,7 @@ namespace Stockpile.Sdk.Utilities
                 catch (Exception ex)
                 {
                     exceptions.Add(ex);
-                    Thread.Sleep(retryInterval);
+                    Task.Delay(retryInterval);
                 }
             }
 

@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Stockpile.StorageAdapter.FileSystem")]
+[assembly: AssemblyProduct("Stockpile.DataProvider.ElasticSearch")]
 [assembly: AssemblyTrademark("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -16,4 +16,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("c2899e41-3dd0-4237-9f14-ce02985c5091")]
+[assembly: Guid("75e1457f-5d88-4e30-b98f-6c0e9131242f")]

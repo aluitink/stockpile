@@ -1,10 +1,9 @@
 using System.IO;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.OptionsModel;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.Options;
 using Stockpile.Api.App;
-using Stockpile.DataProvider.Lucandrew;
+using Stockpile.DataProvider.ElasticSearch;
 using Stockpile.Sdk.Interfaces;
 
 namespace Stockpile.Api.Controllers
@@ -12,13 +11,11 @@ namespace Stockpile.Api.Controllers
     [Route("api/[controller]")]
     public class BaseController : Controller
     {
-        protected HttpContextService HttpContextService { get; set; }
-        protected ILibraryManager LibraryManager { get; private set; }
         protected IStorageAdapter StorageAdapter
         {
             get
             {
-                return _storageAdapter ?? (_storageAdapter = StorageAdapterFactory.GetAdapter(LibraryManager, _stockpileOptions.StorageAdapter, _stockpileOptions.StorageAdapterConnectionString));
+                return _storageAdapter ?? (_storageAdapter = StorageAdapterFactory.GetAdapter(_stockpileOptions.StorageAdapter, _stockpileOptions.StorageAdapterConnectionString));
             }
         }
 
@@ -30,14 +27,12 @@ namespace Stockpile.Api.Controllers
                 {
                     if (_dataProvider == null)
                     {
-                        Logger.LogDebug(string.Format("DataProviderConnectionString: '{0}'", _stockpileOptions.DataProviderConnectionString));
-                        _dataProvider = new LucandrewDataProvider(_stockpileOptions.DataProviderConnectionString);
+                        _dataProvider = new ElasticSearchDataProvider(_stockpileOptions.DataProviderConnectionString);
                     }
                 }
                 return _dataProvider;
             }
         }
-        protected readonly ILogger Logger;
 
         private IStorageAdapter _storageAdapter;
         private static IDataProvider _dataProvider;
@@ -46,34 +41,20 @@ namespace Stockpile.Api.Controllers
         private const string StockKeyHeader = "X-Stock-Key";
         private static readonly object Sync = new object();
 
-        public BaseController(HttpContextService httpContextService, IOptions<StockpileOptions> stockpileOptions)
+        public BaseController(IOptions<StockpileOptions> stockpileOptions)
         {
-            if (httpContextService != null)
-                HttpContextService = httpContextService;
-
-            if (HttpContextService.HttpContext != null)
-            {
-                var loggingFactory = (ILoggerFactory)HttpContextService.HttpContext.ApplicationServices.GetService(typeof(ILoggerFactory));
-                if (loggingFactory != null)
-                    Logger = loggingFactory.CreateLogger(GetType().Name);
-
-                var libraryManager = (ILibraryManager)HttpContextService.HttpContext.ApplicationServices.GetService(typeof(ILibraryManager));
-                if (libraryManager != null)
-                    LibraryManager = libraryManager;
-            }
-            
             if (stockpileOptions != null)
                 _stockpileOptions = stockpileOptions.Value;
         }
 
         public string GetStockKeyFromHeaders()
         {
-            if (HttpContextService == null)
+            if (ControllerContext == null)
                 return null;
 
-            if (HttpContextService.HttpContext.Request.Headers.ContainsKey(StockKeyHeader))
+            if (ControllerContext.HttpContext.Request.Headers.ContainsKey(StockKeyHeader))
             {
-                return HttpContextService.HttpContext.Request.Headers[StockKeyHeader];
+                return ControllerContext.HttpContext.Request.Headers[StockKeyHeader];
             }
 
             return null;

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.Extensions.PlatformAbstractions;
 using Stockpile.Sdk.Interfaces;
 
@@ -13,25 +14,26 @@ namespace Stockpile.Api.App
 
         private static readonly object SyncLock = new object();
 
-        public static IStorageAdapter GetAdapter(ILibraryManager libraryManager, string library, string connectionString)
+        public static IStorageAdapter GetAdapter(string library, string connectionString)
         {
             lock (SyncLock)
-                return AdapterCache.GetOrAdd(library, lib => LoadAdapter(libraryManager, lib, connectionString));
+                return AdapterCache.GetOrAdd(library, lib => LoadAdapter(lib, connectionString));
         }
 
-        protected static IStorageAdapter LoadAdapter(ILibraryManager libraryManager, string library, string connectionString)
+        protected static IStorageAdapter LoadAdapter(string library, string connectionString)
         {
-            var lib = libraryManager.GetLibrary(library);
-
-            var assemblyName = lib.Assemblies.FirstOrDefault();
+            var libs = DefaultAssemblyPartDiscoveryProvider.DiscoverAssemblyParts(library);
+            
+            var lib = libs.FirstOrDefault();
+            var assemblyName = lib.Name;
 
             if (assemblyName == null)
-                throw new ApplicationException("Could not find assembly.");
+                throw new Exception("Could not find assembly.");
 
-            var adapterAssembly = Assembly.Load(assemblyName);
+            var adapterAssembly = Assembly.Load(new AssemblyName(assemblyName));
 
             if (adapterAssembly == null)
-                throw new ApplicationException("Failed to load assembly.");
+                throw new Exception("Failed to load assembly.");
 
             var interfaceType = typeof(IStorageAdapter);
 
@@ -41,7 +43,7 @@ namespace Stockpile.Api.App
             var adapterType = types.FirstOrDefault();
 
             if (adapterType == null)
-                throw new ApplicationException("Could not locate usable interface.");
+                throw new Exception("Could not locate usable interface.");
 
             var adapterInterfaceInstance = Activator.CreateInstance(adapterType, connectionString) as IStorageAdapter;
 
