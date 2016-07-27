@@ -1,7 +1,7 @@
 stockpile:
   build: .
   ports:
-   - "5000:5000"
+   - "80:80"
   volumes:
    - /var/data/stockpile:/data:rw
    - /var/data/stockpile/logs:/var/log/stockpile:rw

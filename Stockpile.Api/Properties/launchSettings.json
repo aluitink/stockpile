@@ -23,6 +23,22 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "Docker": {
+      "executablePath": "%WINDIR%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "commandLineArgs": "-ExecutionPolicy RemoteSigned .\\DockerTask.ps1 -Run -Environment $(Configuration) -Machine '$(DockerMachineName)'",
+      "environmentVariables": {
+        "DOCKER_TLS_VERIFY": "1",
+        "DOCKER_MACHINE_NAME": "default",
+        "DOCKER_CERT_PATH": "C:\\Users\\Andrew\\.docker\\machine\\machines\\default",
+        "DOCKER_HOST": "tcp://192.168.99.100:2376"
+      }
+    },
+    "web": {
+      "commandName": "web",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }

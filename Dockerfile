@@ -1,27 +1,14 @@
-FROM microsoft/aspnet:1.0.0-rc1-update1
+FROM microsoft/dotnet:1.0.0-core
 
+# Set the Working Directory
+WORKDIR /app
 
-COPY Stockpile.Sdk/project.json /opt/stockpile/Stockpile.Sdk/
-COPY Stockpile.DataProvider.Lucandrew/project.json /opt/stockpile/Stockpile.DataProvider.Lucandrew/
-COPY Stockpile.StorageAdapter.FileSystem/project.json /opt/stockpile/Stockpile.StorageAdapter.FileSystem/
-COPY Stockpile.Api/project.json /opt/stockpile/Stockpile.Api/
+# Configure the listening port to 80
+ENV ASPNETCORE_URLS http://*:80
+EXPOSE 80
 
-WORKDIR /opt/stockpile/Stockpile.Sdk
-RUN ["dnu", "restore"]
-
-WORKDIR /opt/stockpile/Stockpile.DataProvider.Lucandrew
-RUN ["dnu", "restore"]
-
-WORKDIR /opt/stockpile/Stockpile.StorageAdapter.FileSystem
-RUN ["dnu", "restore"]
-
-WORKDIR /opt/stockpile/Stockpile.Api
-RUN ["dnu", "restore"]
-
-COPY Stockpile.Sdk /opt/stockpile/Stockpile.Sdk
-COPY Stockpile.DataProvider.Lucandrew /opt/stockpile/Stockpile.DataProvider.Lucandrew
-COPY Stockpile.StorageAdapter.FileSystem /opt/stockpile/Stockpile.StorageAdapter.FileSystem
-COPY Stockpile.Api /opt/stockpile/Stockpile.Api
+# Copy the app
+COPY . /app
 
 RUN mkdir /data
 RUN mkdir /data/db
@@ -30,6 +17,5 @@ RUN mkdir /var/log/stockpile
 
 VOLUME ["/data"]
 
-EXPOSE 5000
-
-ENTRYPOINT dnx -p project.json --configuration Release kestrel
+# Start the app
+ENTRYPOINT dotnet Stockpile.Api.dll

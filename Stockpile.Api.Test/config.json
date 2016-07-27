@@ -1,6 +1,0 @@
-﻿{
-  "StorageAdapter": "Stockpile.StorageAdapter.FileSystem",
-  "StorageAdapterConnectionString": "DATA=C:\\Temp\\stockpile\\data",
-  "DataProviderConnectionString": "DATA=C:\\Temp\\stockpile\\provider",
-  "LoggingDirectory": "C:\\Temp\\stockpile\\logs"
-}
