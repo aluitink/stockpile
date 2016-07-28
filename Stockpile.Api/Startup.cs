@@ -21,13 +21,8 @@ namespace Stockpile.Api
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("hosting.json", optional: true)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
-
-            if (env.IsProduction())
-                builder.AddEnvironmentVariables();
-
+                .AddEnvironmentVariables();
+            
             Configuration = builder.Build();
         }
         
@@ -36,7 +31,7 @@ namespace Stockpile.Api
         {
             services.AddLogging();
             services.AddTransient<HttpContextService>();
-            services.Configure<StockpileOptions>(Configuration.GetSection("Settings"));
+            services.Configure<StockpileOptions>(Configuration);
             services.AddMvc(options =>
             {
                 options.Filters.Add(typeof(LastChanceExceptionHandler));

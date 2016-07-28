@@ -13,8 +13,8 @@ namespace Stockpile.Api.Controllers
 {
     public class DataController : BaseController
     {
-        public DataController(IOptions<StockpileOptions> stockpileOptions)
-            : base(stockpileOptions) { }
+        public DataController(IOptions<StockpileOptions> stockpileOptions, ILogger<DataController> logger)
+            : base(stockpileOptions, logger) { }
 
         // GET api/data/5
         [HttpGet("{id}")]

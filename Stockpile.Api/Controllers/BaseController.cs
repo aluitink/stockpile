@@ -15,6 +15,8 @@ namespace Stockpile.Api.Controllers
         {
             get
             {
+                Logger.LogInformation("StorageAdapter", _stockpileOptions.StorageAdapter);
+                Logger.LogInformation("StorageAdapterConnectionString", _stockpileOptions.StorageAdapterConnectionString);
                 return _storageAdapter ?? (_storageAdapter = StorageAdapterFactory.GetAdapter(_stockpileOptions.StorageAdapter, _stockpileOptions.StorageAdapterConnectionString));
             }
         }
@@ -27,12 +29,15 @@ namespace Stockpile.Api.Controllers
                 {
                     if (_dataProvider == null)
                     {
+                        Logger.LogInformation("DataProviderConnectionString", _stockpileOptions.DataProviderConnectionString);
                         _dataProvider = new ElasticSearchDataProvider(_stockpileOptions.DataProviderConnectionString);
                     }
                 }
                 return _dataProvider;
             }
         }
+
+        protected ILogger Logger;
 
         private IStorageAdapter _storageAdapter;
         private static IDataProvider _dataProvider;
@@ -41,10 +46,11 @@ namespace Stockpile.Api.Controllers
         private const string StockKeyHeader = "X-Stock-Key";
         private static readonly object Sync = new object();
 
-        public BaseController(IOptions<StockpileOptions> stockpileOptions)
+        public BaseController(IOptions<StockpileOptions> stockpileOptions, ILogger logger)
         {
             if (stockpileOptions != null)
                 _stockpileOptions = stockpileOptions.Value;
+            Logger = logger;
         }
 
         public string GetStockKeyFromHeaders()
