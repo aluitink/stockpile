@@ -16,7 +16,7 @@ namespace Stockpile.StorageAdapter.FileSystem
 
         private Stream _indexStream;
 
-        private static EventWaitHandle _crossProcessWaitHandle = new EventWaitHandle(true, EventResetMode.AutoReset, "4D1EDE25-7550-4CDA-AC2E-7C85B110B7FE");
+        //private static EventWaitHandle _crossProcessWaitHandle = new EventWaitHandle(true, EventResetMode.AutoReset, "4D1EDE25-7550-4CDA-AC2E-7C85B110B7FE");
         
         private static object _sync = new object();
 
@@ -36,7 +36,7 @@ namespace Stockpile.StorageAdapter.FileSystem
             
             lock (_sync)
             {
-                _crossProcessWaitHandle.WaitOne();
+                //_crossProcessWaitHandle.WaitOne();
                 long previousIndex = _indexCurrentValue;
                 try
                 {
@@ -59,7 +59,7 @@ namespace Stockpile.StorageAdapter.FileSystem
                 }
                 finally
                 {
-                    _crossProcessWaitHandle.Set();
+                    //_crossProcessWaitHandle.Set();
                 }
             }
 
