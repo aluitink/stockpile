@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0-*",
+  "description": "Stockpile.Benchmark Console Application",
+  "authors": [ "Andrew" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "Stockpile.Public.Sdk": "1.0.0-*"
+  },
+
+  "commands": {
+    "Stockpile.Benchmark": "Stockpile.Benchmark"
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": [
+        "dotnet5.6",
+        "portable-net45+win8"
+      ]
+    }
+  }
+}

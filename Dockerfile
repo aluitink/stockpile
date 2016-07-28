@@ -7,7 +7,7 @@ EXPOSE 80
 # Copy the app
 
 # Set the Working Directory
-WORKDIR /dotnetapp/Stockpile.Api
+WORKDIR /dotnetapp/Stockpile.Public.Api
 
 RUN mkdir /data
 
