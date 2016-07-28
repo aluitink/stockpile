@@ -17,8 +17,7 @@ namespace Stockpile.StorageAdapter.FileSystem
         private Stream _indexStream;
 
         //private static EventWaitHandle _crossProcessWaitHandle = new EventWaitHandle(true, EventResetMode.AutoReset, "4D1EDE25-7550-4CDA-AC2E-7C85B110B7FE");
-        
-        private static object _sync = new object();
+        private static Mutex _mutex = new Mutex(false, "4D1EDE25-7550-4CDA-AC2E-7C85B110B7FE");
 
         public FileSystemAdapter(string connectionString)
         {
@@ -34,33 +33,28 @@ namespace Stockpile.StorageAdapter.FileSystem
             string nextFilePath = null;
             string key = null;
             
-            lock (_sync)
+            long previousIndex = _indexCurrentValue;
+            try
             {
-                //_crossProcessWaitHandle.WaitOne();
-                long previousIndex = _indexCurrentValue;
-                try
+                do
                 {
-                    do
-                    {
-                        key = GetNextKey();
-                        var nextFile = KeyToPath(key);
-                        nextFilePath = Path.Combine(RootPath, nextFile);
-                        if (File.Exists(nextFilePath))
-                            WriteValue(_indexCurrentValue);
-                    } while (File.Exists(nextFilePath));
-                    //Update Index
-                    WriteValue(_indexCurrentValue);
+                    key = GetNextKey();
+                    var nextFile = KeyToPath(key);
+                    nextFilePath = Path.Combine(RootPath, nextFile);
+                    if (File.Exists(nextFilePath))
+                        WriteValue(_indexCurrentValue);
+                } while (File.Exists(nextFilePath));
+                //Update Index
+                WriteValue(_indexCurrentValue);
+            }
+            catch (IOException ex)
+            {
+                _indexCurrentValue = previousIndex;
+                throw;
+            }
+            finally
+            {
 
-                }
-                catch (IOException ex)
-                {
-                    _indexCurrentValue = previousIndex;
-                    throw;
-                }
-                finally
-                {
-                    //_crossProcessWaitHandle.Set();
-                }
             }
 
             if (!WriteFile(nextFilePath, data).Result)
@@ -159,19 +153,25 @@ namespace Stockpile.StorageAdapter.FileSystem
 
         private void WriteValue(long value)
         {
-            lock (_sync)
+            try
             {
+                _mutex.WaitOne();
                 byte[] currentValue = BitConverter.GetBytes(value);
 
                 _indexStream.Position = 0;
                 _indexStream.Write(currentValue, 0, 8);
             }
+            finally
+            {
+                _mutex.ReleaseMutex();
+            }
         }
 
         private void ReadValue()
         {
-            lock (_sync)
+            try
             {
+                _mutex.WaitOne();
                 byte[] currentValue = new byte[8];
 
                 _indexStream.Position = 0;
@@ -179,6 +179,10 @@ namespace Stockpile.StorageAdapter.FileSystem
                 if (i <= 0)
                     throw new Exception("could not read from stream.");
                 _indexCurrentValue = BitConverter.ToInt32(currentValue, 0);
+            }
+            finally
+            {
+                _mutex.ReleaseMutex();
             }
         }
 
@@ -196,7 +200,7 @@ namespace Stockpile.StorageAdapter.FileSystem
             if (!Int64.TryParse(key, out seq) || seq < 0 || seq > 999999999999)
             {
                 throw (new ArgumentException(String.Format(
-                    "File System Store requires key to be an integer between 0 and 999999999999")));
+                    "Key must be between 0 and 999999999999")));
             }
 
             string path = Path.Combine(RootPath, String.Format("{1:D3}{0}{2:D3}{0}{3:D3}{0}{4:D3}{0}{5}",
