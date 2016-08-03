@@ -18,10 +18,13 @@
     },
     "Stockpile.Api": {
       "commandName": "Project",
-      "launchBrowser": true,
       "launchUrl": "http://localhost:5001/api/values",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "DataProviderConnectionString": "http://192.168.1.15:9200/",
+        "ASPNETCORE_URLS": "http://*:5001",
+        "StorageAdapter": "Stockpile.StorageAdapter.FileSystem",
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "StorageAdapterConnectionString": "DATA=C:\\Temp\\stockpile\\data"
       }
     },
     "Docker": {

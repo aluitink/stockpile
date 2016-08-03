@@ -18,20 +18,20 @@ namespace Stockpile.Public.Api
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json")
                 .AddEnvironmentVariables();
-            
             Configuration = builder.Build();
         }
         
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLogging();
-            services.AddTransient<HttpContextService>();
-            services.Configure<StockpileOptions>(Configuration);
             services.AddMvc(options =>
             {
                 options.Filters.Add(typeof(LastChanceExceptionHandler));
             });
+            services.AddLogging();
+            services.AddOptions();
+            services.Configure<StockpileOptions>(Configuration.GetSection("Settings"));
+            services.Configure<StockpileOptions>(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
